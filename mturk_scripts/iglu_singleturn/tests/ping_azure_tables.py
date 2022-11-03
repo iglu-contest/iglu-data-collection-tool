@@ -46,6 +46,7 @@ def main():
             config['hits_table_name'], connection_str, config['seed_structures_container_name'],
             config['seed_structures_blob_prefix']) as game_storage:
 
+        # This function depends on the azure storage client
         random_seed_structures = game_storage.select_start_worlds_ids(game_count=10)
         if len(random_seed_structures) != 10:
             print("Error retrieving initial structure ids")
@@ -53,6 +54,7 @@ def main():
             print(f"{len(random_seed_structures)} initial structure ids correctly restored "
                   "from azure tables.")
 
+        # This function depends on the azure tables client
         last_game_id = game_storage.get_last_game_index()
         if last_game_id == 0:
             print("Error retrieving data from container")

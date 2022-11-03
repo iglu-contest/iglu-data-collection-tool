@@ -20,7 +20,8 @@ class Turn:
         self.initial_game_id_blob = initial_game_id_blob
         self.open_hits = []
         self.starting_world_id = starting_world_id
-        # TODO Do we need this?
+        # TODO Do we need this? - For now yes because the template is expecting valid values
+        # for this variables
         self.screenshot_step_view = screenshot_step_view
         self.screenshot_step_in_blob = screenshot_step_in_blob
 
@@ -51,13 +52,15 @@ class IgluSingleTurnGameStorage:
         self.blob_service_client = None
 
         self.running_games = {}
-
-        self.create_tables_if_not_exists()
-
         # Game ids are sequential numbers. We store the
         self.current_last_game_id = None
 
     def __enter__(self):
+        with TableServiceClient.from_connection_string(
+                self.azure_connection_str) as table_service_client:
+            _ = table_service_client.create_table_if_not_exists(
+                table_name=self.hits_table_name)
+
         self.table_client = TableClient.from_connection_string(
             conn_str=self.azure_connection_str, table_name=self.hits_table_name)
         self.table_client.__enter__()
@@ -71,13 +74,6 @@ class IgluSingleTurnGameStorage:
         self.table_client = None
         return None
 
-    def create_tables_if_not_exists(self) -> None:
-        """Creates game and hits tables in Azure tables if they don't exist."""
-
-        with TableServiceClient.from_connection_string(
-                self.azure_connection_str) as table_service_client:
-            table_service_client.create_table_if_not_exists(table_name=self.hits_table_name)
-
     def get_last_game_index(self) -> int:
         """Returns the maximum game index, stored in column PartitionKey of the hits table.
 
@@ -87,8 +83,10 @@ class IgluSingleTurnGameStorage:
             The highest integer in the game ids of the hit table for entries created before
             the current date.
         """
+        if self.table_client is None:
+            raise ValueError("IgluSingleTurnGameStorage used outside a with statement!")
 
-        # TODO: question, why is it necessary to filter by date here?
+        # TODO: question, why was it necessary to filter by date here?
         query_filter = "HitType eq 'builder-normal'"
         entities = list(self.table_client.query_entities(
             query_filter=query_filter,
