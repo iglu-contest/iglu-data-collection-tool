@@ -1,10 +1,11 @@
 """Test GameStorage functions with azure table clients mocked."""
 
 import os
+import sys
 import unittest
+
 from unittest import mock
 
-import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
 
 from singleturn_games_storage import IgluSingleTurnGameStorage  # noqa: E402
@@ -16,6 +17,8 @@ class TestIgluSingleTurnGameStorage(unittest.TestCase):
 
     HITS_TABLE_NAME: str = 'HitsTable'
     AZURE_CONNECTION_STR: str = 'some_hash_string'
+    CONTAINER_NAME: str = 'mturk-vw'
+    BLOB_PREFIX: str = 'builder-data'
 
     def mock_table_client_senvice_context_manager(
             self, table_client_service_class_mock: mock.MagicMock,
@@ -66,7 +69,9 @@ class TestIgluSingleTurnGameStorage(unittest.TestCase):
         _ = self.mock_table_client_senvice_context_manager(
             table_client_service_class_mock, table_client_service_mock)
 
-        with IgluSingleTurnGameStorage(self.HITS_TABLE_NAME, self.AZURE_CONNECTION_STR) as _:
+        with IgluSingleTurnGameStorage(
+                self.HITS_TABLE_NAME, self.AZURE_CONNECTION_STR,
+                self.CONTAINER_NAME, self.BLOB_PREFIX) as _:
             table_client_service_class_mock.from_connection_string.assert_called_with(
                 self.AZURE_CONNECTION_STR)
             table_client_service_mock.create_table_if_not_exists.assert_called_with(
@@ -84,8 +89,8 @@ class TestIgluSingleTurnGameStorage(unittest.TestCase):
         table_client_class_mock.from_connection_string.return_value = table_client_mock
 
         with IgluSingleTurnGameStorage(
-                self.HITS_TABLE_NAME,
-                self.AZURE_CONNECTION_STR) as game_storage:
+                self.HITS_TABLE_NAME, self.AZURE_CONNECTION_STR,
+                self.CONTAINER_NAME, self.BLOB_PREFIX) as game_storage:
             table_client_class_mock.from_connection_string.assert_called()
             table_client_mock.__enter__.assert_called()
             table_client_mock.__exit__.assert_not_called()
@@ -98,30 +103,26 @@ class TestIgluSingleTurnGameStorage(unittest.TestCase):
 
         This test fails if __exit__ method is not implemented correctly.
         """
-        execption_str = "This should have been raised"
+        exception_str = "This should have been raised"
 
         def failing_function():
             with IgluSingleTurnGameStorage(
-                    self.HITS_TABLE_NAME,
-                    self.AZURE_CONNECTION_STR) as _:
-                raise ValueError(execption_str)
+                    self.HITS_TABLE_NAME, self.AZURE_CONNECTION_STR,
+                    self.CONTAINER_NAME, self.BLOB_PREFIX) as _:
+                raise ValueError(exception_str)
 
         with self.assertRaises(ValueError) as raised_exception:
             failing_function()
-        self.assertEqual(raised_exception.exception.args[0], execption_str)
+        self.assertEqual(raised_exception.exception.args[0], exception_str)
 
     def test_game_storage_fails_if_outside_with(self, *args):
         """If IgluSingleTurnGameStorage is used without a context manager, raise exception."""
 
         def failing_function():
-            storage = IgluSingleTurnGameStorage(self.HITS_TABLE_NAME, self.AZURE_CONNECTION_STR)
+            storage = IgluSingleTurnGameStorage(
+                self.HITS_TABLE_NAME, self.AZURE_CONNECTION_STR,
+                self.CONTAINER_NAME, self.BLOB_PREFIX)
             storage.get_last_game_index()
-
-        self.assertRaises(ValueError, failing_function)
-
-        def failing_function():
-            storage = IgluSingleTurnGameStorage(self.HITS_TABLE_NAME, self.AZURE_CONNECTION_STR)
-            storage.select_start_worlds_ids(3)
 
         self.assertRaises(ValueError, failing_function)
 

@@ -51,14 +51,13 @@
   <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'/>
   <script type='text/javascript' src='https://s3.amazonaws.com/mturk-public/externalHIT_v1.js'></script>
   <script type="text/javascript">
-   function handleSubmit(txt) {
-      console.log('upload to Azure');
+    function handleSubmit(txt) {
+      console.log('submited!');
       console.log('$gameId');
-      myWorld.uploadToCloud('https://iglumturkstorage.blob.core.windows.net/mturk-single-turn/${builderDataPath}/actionHit/',
-      '$sas',
-      '$gameId', '$gameId-step-action', function() {
-        document.getElementById("mturk_form").submit();
-      });
+      console.log('https://iglumturkstorage.blob.core.windows.net/mturk-single-turn/${builderDataPath}/actionHit/');
+      console.log('$sas');
+      console.log('$gameId-step-action');
+      document.getElementById("mturk_form").submit();
       return false;
    }
    function recover_world() {
