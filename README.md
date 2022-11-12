@@ -22,7 +22,7 @@ contains the following information: 1) a time stamp, 2) the chat history up unti
 representing the orientation of their camera), 4) the Builder’s block inventory, 5) the locations of
 the blocks in the build region.
 
-![Gif with interactions between Architect and Builder](./resources/imgs/voxelwrold_building_dialog.gif)
+<img src="./resources/imgs/voxelwrold_building_dialog.gif" width="420" height="280" alt="Gif with interactions between Architect and Builder"/>
 
 
 TODO add past competition links
