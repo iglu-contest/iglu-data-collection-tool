@@ -3,10 +3,11 @@ import dotenv
 import os
 import sys
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
+# Project root
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
 
-from singleturn_games_storage import IgluSingleTurnGameStorage  # noqa: E402
-from hit_manager import BuilderTemplateRenderer  # noqa: E402
+from singleturn.singleturn_games_storage import IgluSingleTurnGameStorage  # noqa: E402
+from singleturn.builder_template_renderer import BuilderTemplateRenderer  # noqa: E402
 from utils import read_config  # noqa: E402
 
 dotenv.load_dotenv(
@@ -26,7 +27,7 @@ class HTMLBuilderTemplateRenderer(BuilderTemplateRenderer):
 
 def main():
 
-    config = read_config("sandbox")
+    config = read_config('sandbox', config_filepath='../env_configs.json')
 
     config['azure_connection_str'] = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
     config['azure_sas'] = os.getenv('AZURE_STORAGE_SAS')

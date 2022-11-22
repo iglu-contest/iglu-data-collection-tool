@@ -13,7 +13,8 @@ import sys
 
 from typing import Any, Dict
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
+# Project root
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
 
 # Load dotenv before project imports
 dotenv.load_dotenv(
@@ -21,8 +22,9 @@ dotenv.load_dotenv(
 
 import logger  # noqa: E402
 
-from hit_manager import HITManager, BuilderTemplateRenderer  # noqa: E402
-from singleturn_games_storage import IgluSingleTurnGameStorage  # noqa: E402
+from hit_manager import HITManager  # noqa: E402
+from singleturn.builder_template_renderer import BuilderTemplateRenderer  # noqa: E402
+from singleturn.singleturn_games_storage import IgluSingleTurnGameStorage  # noqa: E402
 from utils import read_config  # noqa: E402
 
 _LOGGER = logger.get_logger(__name__)
@@ -43,9 +45,10 @@ def builder_normal_template_kwargs(azure_sas, open_turn) -> Dict[str, Any]:
 
 def main():
 
-    config = read_config("sandbox")
+    config = read_config("sandbox", config_filepath='../env_configs.json')
     # Create hits without qualifiers
-    config.pop('qualification_type_id')
+    if 'qualification_type_id' in config:
+        config.pop('qualification_type_id')
 
     config['azure_connection_str'] = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
     config['azure_sas'] = os.getenv('AZURE_STORAGE_SAS')

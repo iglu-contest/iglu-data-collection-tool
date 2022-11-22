@@ -16,7 +16,7 @@ from typing import Dict, Any
 import logger
 
 from hit_manager import HITManager, BuilderTemplateRenderer
-from singleturn_games_storage import IgluSingleTurnGameStorage, Turn
+from singleturn.singleturn_games_storage import IgluSingleTurnGameStorage, SingleTurnDatasetTurn
 from utils import read_config
 
 dotenv.load_dotenv()
@@ -107,7 +107,7 @@ def run_hits(hit_count, template_filepath, config, seconds_to_wait=60):
                 if entity is None:
                     _LOGGER.error(f'No turn found for HIT {hit_id}')
 
-                hit_turn = Turn.from_database_entry(entity)
+                hit_turn = SingleTurnDatasetTurn.from_database_entry(entity)
 
                 # Storing action data path
                 hit_turn.update_result_blob_path(
@@ -126,7 +126,7 @@ def run_hits(hit_count, template_filepath, config, seconds_to_wait=60):
 def main():
 
     args = read_args()
-    config = read_config(args.config)
+    config = read_config(args.config, config_filepath='./env_configs.json')
 
     config['azure_connection_str'] = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
     config['azure_sas'] = os.getenv('AZURE_STORAGE_SAS')

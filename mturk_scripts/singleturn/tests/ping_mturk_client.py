@@ -7,7 +7,8 @@ import dotenv
 import os
 import sys
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
+# Project root
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
 
 # Load dotenv before project imports
 dotenv.load_dotenv(

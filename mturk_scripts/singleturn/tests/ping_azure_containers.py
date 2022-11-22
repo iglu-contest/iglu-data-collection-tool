@@ -9,10 +9,11 @@ import dotenv
 import os
 import sys
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
+# Project root
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
 
 import logger  # noqa: E402
-from singleturn_games_storage import IgluSingleTurnGameStorage  # noqa: E402
+from singleturn.singleturn_games_storage import IgluSingleTurnGameStorage  # noqa: E402
 from utils import read_config  # noqa: E402
 
 # Load dotenv before project imports

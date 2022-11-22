@@ -7,6 +7,7 @@ import dotenv
 import os
 import sys
 
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
 
 # Load dotenv before project imports
@@ -31,7 +32,7 @@ def read_args():
 
 def main():
     args = read_args()
-    config = read_config("sandbox")
+    config = read_config("sandbox", config_filepath='../env_configs.json')
 
     config['aws_access_key'] = os.getenv("AWS_ACCESS_KEY_ID_LIT")
     config['aws_secret_key'] = os.getenv("AWS_SECRET_ACCESS_KEY_LIT")
