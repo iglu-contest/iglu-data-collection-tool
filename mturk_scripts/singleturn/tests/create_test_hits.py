@@ -30,19 +30,6 @@ from utils import read_config  # noqa: E402
 _LOGGER = logger.get_logger(__name__)
 
 
-def builder_normal_template_kwargs(azure_sas, open_turn) -> Dict[str, Any]:
-    """Creates a dictionary with necessary keys to render a normal_builder template.
-    """
-    return {
-        "game_id": open_turn.game_id,
-        "azure_sas": azure_sas,
-        "initialized_world_game_id": open_turn.starting_world_id,
-        "builder_data_path": open_turn.initial_game_blob_path,
-        "step_screenshot_view": open_turn.screenshot_step_view,
-        "step_screenshot_path": open_turn.starting_step,
-    }
-
-
 def main():
 
     config = read_config("sandbox", config_filepath='../env_configs.json')

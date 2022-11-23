@@ -51,19 +51,6 @@ def read_args():
     return parser.parse_args()
 
 
-def builder_normal_template_kwargs(azure_sas, open_turn) -> Dict[str, Any]:
-    """Creates a dictionary with necessary keys to render a normal_builder template.
-    """
-    return {
-        "game_id": open_turn.game_id,
-        "azure_sas": azure_sas,
-        "initialized_world_game_id": open_turn.starting_world_id,
-        "builder_data_path": open_turn.builder_data_path_in_blob,
-        "step_screenshot_view": open_turn.screenshot_step_view,
-        "step_screenshot_path": open_turn.starting_step,
-    }
-
-
 def run_hits(hit_count, template_filepath, config, seconds_to_wait=60):
 
     with IgluSingleTurnGameStorage(**config) as game_storage:

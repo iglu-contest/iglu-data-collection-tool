@@ -22,7 +22,7 @@ The general structure of the HITs are:
 
 * An interactive agent, controlled by the annotator, is dropped in the middle of an ongoing game where the structure is built partially. The partially completed game is retrieved from the multi-turn interactions
 dataset mentioned above.
-• Annotators must perform a sequence of actions of their choosing for a duration of one minute.
-• After the minute has passed, the annotator describes their performed set of actions in natural language in the form of instructions.
+* Annotators must perform a sequence of actions of their choosing for a duration of one minute.
+* After the minute has passed, the annotator describes their performed set of actions in natural language in the form of instructions.
 
 To improve quality, we tag a hit as accepted by some heuristic criteria, including but not limited to the given instruction must be in "English," and the length of the instructions should not very short.

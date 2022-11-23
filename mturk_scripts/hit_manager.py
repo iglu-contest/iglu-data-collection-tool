@@ -119,6 +119,15 @@ class HITManager:
     def is_hit_expired(hit_dict):
         return datetime.datetime.now().timestamp() >= hit_dict['Expiration'].timestamp()
 
+    def _build_assignment_dict(self, assignment):
+        answer = self._parse_xml_response(assignment["Answer"])
+        if answer is not None:
+            assignment_dict = {}
+            assignment_dict['WorkerId'] = assignment['WorkerId']
+            assignment_dict["InputInstruction"] = answer
+            return assignment_dict
+        return None
+
     def complete_open_assignments(self, hit_ids: List[str]) -> Dict[str, Any]:
         """Get a list of the Assignments that have been submitted for all open hits.
 
@@ -145,19 +154,13 @@ class HITManager:
                 continue
 
             assignments = submitted_assignments['Assignments']
+            # Retrieve the attributes for each Assignment
             for assignment in assignments:
                 _LOGGER.info(f"Processing {assignment['AssignmentId']} assignment for HIT {hit_id}")
-                assignment_dict = {}
-
-                # Retrieve the attributes for each Assignment
-                assignment_dict['WorkerId'] = assignment['WorkerId']
-
-                answer = self._parse_xml_response(assignment["Answer"])
-                if answer is not None:
-                    assignment_dict["InputInstruction"] = answer
+                assignment_dict = self._build_assignment_dict(assignment)
+                if assignment_dict is not None:
                     qualified = self.verify_new_assignment(assignment_dict)
                     assignment_dict['IsHITQualified'] = qualified
-                    results[hit_id] = assignment_dict
                     self.close_assignment(assignment['AssignmentId'], hit_id, qualified)
         return results
 
