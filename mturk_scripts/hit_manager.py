@@ -120,6 +120,14 @@ class HITManager:
         return datetime.datetime.now().timestamp() >= hit_dict['Expiration'].timestamp()
 
     def _build_assignment_dict(self, assignment):
+        """Extracts answers from Mturk assignment dict returned by boto3 api.
+
+        This method is particular to each template, so subclasses are encouraged to override it.
+
+        Returns:
+            A dictionary with the extracted data, or None if there are no Answers in the
+            assignment.
+        """
         answer = self._parse_xml_response(assignment["Answer"])
         if answer is not None:
             assignment_dict = {}
@@ -161,6 +169,7 @@ class HITManager:
                 if assignment_dict is not None:
                     qualified = self.verify_new_assignment(assignment_dict)
                     assignment_dict['IsHITQualified'] = qualified
+                    results[hit_id] = assignment_dict
                     self.close_assignment(assignment['AssignmentId'], hit_id, qualified)
         return results
 
