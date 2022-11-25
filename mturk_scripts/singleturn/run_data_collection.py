@@ -8,16 +8,20 @@ the script is executed again, before the assignment expires.
 """
 
 import argparse
+import sys
 import dotenv
 import os
 import time
-from typing import Dict, Any
+
+# Project root
+sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
 
 import logger
+import utils
 
-from hit_manager import HITManager, BuilderTemplateRenderer
+from hit_manager import HITManager
+from singleturn.builder_template_renderer import BuilderTemplateRenderer
 from singleturn.singleturn_games_storage import IgluSingleTurnGameStorage, SingleTurnDatasetTurn
-from utils import read_config
 
 dotenv.load_dotenv()
 
@@ -51,6 +55,50 @@ def read_args():
     return parser.parse_args()
 
 
+def validate_assignment(assignment_dict) -> bool:
+    """Asserts whether the assignment should be approved or not.
+
+    The HIT manager will receive the assignment, parse the response and store it
+    into the 'Answer' key of `assignment_dict`. The structure of the dictionary
+    under Answer is dependant on the structure of the layout used to create the
+    HIT.
+
+    Additionally, this function can apply changes to the assignment_dict. The same
+    reference will be returned by `HitManager.complete_open_assignments()`.
+
+    Args:
+        assignment_dict (dictionary): A dictionary representation of the
+            assignment, with at least key 'Answer'.
+
+    Returns:
+        bool: Whether the assignment should be approved.
+    """
+    # Extract input instruction from answer
+    input_instruction = None
+    answer_list = []
+    if not type(assignment_dict['Answer']) is list:
+        # One field found in HIT layout
+        answer_list = [assignment_dict['Answer']]
+    else:
+        # Multiple fields in HIT layout
+        answer_list = assignment_dict['Answer']
+
+    for answer_field in answer_list:
+        if answer_field['QuestionIdentifier'] == 'InputInstructionSingleTurn':
+            input_instruction = answer_field['FreeText']
+            break
+
+    # Save the relevant fields for easier access later
+    assignment_dict['InputInstruction'] = input_instruction
+
+    qualified = False
+    if (input_instruction is not None and
+            len(input_instruction.strip()) > 5 and
+            utils.is_english(input_instruction)):
+        qualified = True
+    return qualified
+
+
 def run_hits(hit_count, template_filepath, config, seconds_to_wait=60):
 
     with IgluSingleTurnGameStorage(**config) as game_storage:
@@ -59,7 +107,8 @@ def run_hits(hit_count, template_filepath, config, seconds_to_wait=60):
         _LOGGER.info(f"Creating hits for turns {len(open_turns)}")
 
         renderer = BuilderTemplateRenderer(template_filepath)
-        hit_manager = HITManager(templates_dirname='templates', **config)
+        hit_manager = HITManager(
+            templates_dirname='templates', verification_function=validate_assignment, **config)
 
         for open_turn in open_turns:
             template = renderer.render_template_from_turn(config['azure_sas'], open_turn)
@@ -70,50 +119,54 @@ def run_hits(hit_count, template_filepath, config, seconds_to_wait=60):
             game_storage.save_new_turn(open_turn)
 
         _LOGGER.info("HITs created successfully, waiting for assignments submissions")
-        while True:
-            # Look for further open hits
-            open_hit_ids = game_storage.get_open_hit_ids(hit_type=turn_type)
-            if len(open_hit_ids) == 0:
-                _LOGGER.warning("No more non-expired hits to review for this type of turn. "
+
+        wait_for_assignments(config, seconds_to_wait, game_storage, turn_type, hit_manager)
+
+
+def wait_for_assignments(config, seconds_to_wait, game_storage, turn_type, hit_manager):
+    while True:
+        # Look for further open hits
+        open_hit_ids = hit_manager.get_open_hit_ids(hit_type=turn_type)
+        if len(open_hit_ids) == 0:
+            _LOGGER.warning("No more non-expired hits to review for this type of turn. "
                                 "Exiting script.")
-                break
+            break
 
             # Look for new submitted assignments and review them.
-            completed_assignments = hit_manager.complete_open_assignments(open_hit_ids)
+        completed_assignments = hit_manager.complete_open_assignments(open_hit_ids)
 
             # If there were assignments completed in the previous function, save the
             # results into the game storage.
-            if len(completed_assignments) == 0:
-                _LOGGER.info(f"No new assignments, waiting for {seconds_to_wait} seconds.")
-                time.sleep(seconds_to_wait)
-                continue
+        if len(completed_assignments) == 0:
+            _LOGGER.info(f"No new assignments, waiting for {seconds_to_wait} seconds.")
+            time.sleep(seconds_to_wait)
+            continue
 
-            for hit_id, assignment_answers in completed_assignments.items():
+        for hit_id, assignment_answers in completed_assignments.items():
+            entity = game_storage.retrieve_turn_entity(hit_id)
+            if entity is None:
+                _LOGGER.error(f'No turn found for HIT {hit_id}')
 
-                entity = game_storage.retrieve_turn_entity(hit_id)
-                if entity is None:
-                    _LOGGER.error(f'No turn found for HIT {hit_id}')
-
-                hit_turn = SingleTurnDatasetTurn.from_database_entry(entity)
+            hit_turn = SingleTurnDatasetTurn.from_database_entry(entity)
 
                 # Storing action data path
-                hit_turn.update_result_blob_path(
-                    container_name=config['result_structures_container_name'],
-                    blob_subpaths='actionHit')
+            hit_turn.update_result_blob_path(
+                container_name=config['result_structures_container_name'],
+                blob_subpaths='actionHit')
 
                 # Update turn with assignment values after processing Hit
-                hit_turn.input_instructions = assignment_answers['InputInstruction']
-                hit_turn.is_qualified = assignment_answers['IsHITQualified']
-                hit_turn.worker_id = assignment_answers['WorkerId']
+            hit_turn.input_instructions = assignment_answers['InputInstruction']
+            hit_turn.is_qualified = assignment_answers['IsHITQualified']
+            hit_turn.worker_id = assignment_answers['WorkerId']
 
-                game_storage.upsert_turn(hit_turn)
-                _LOGGER.info(f"Assignment for hit {hit_id} successfully saved.")
+            game_storage.upsert_turn(hit_turn)
+            _LOGGER.info(f"Assignment for hit {hit_id} successfully saved.")
 
 
 def main():
 
     args = read_args()
-    config = read_config(args.config, config_filepath='./env_configs.json')
+    config = utils.read_config(args.config, config_filepath='./env_configs.json')
 
     config['azure_connection_str'] = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
     config['azure_sas'] = os.getenv('AZURE_STORAGE_SAS')

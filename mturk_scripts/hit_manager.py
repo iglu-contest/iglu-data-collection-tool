@@ -6,7 +6,7 @@ import json
 import xmltodict
 
 from string import Template
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 import logger
 import utils
@@ -36,6 +36,7 @@ class HITManager:
 
     def __init__(self, mturk_endpoint: str,
                  aws_access_key: str, aws_secret_key: str, max_hits: int = 99,
+                 verification_function: Optional[Callable[[Dict[str, str]], bool]] = None,
                  **kwargs) -> None:
         self.mturk_client = boto3.client(
             aws_access_key_id=aws_access_key,
@@ -48,6 +49,10 @@ class HITManager:
         # Save the open hits to know when to stop the collection. More hits may be open
         # from previous runs, and will be completed by this script.
         self.session_open_hits = set()
+        if verification_function is None:
+            self.verification_function = lambda x: True
+        else:
+            self.verification_function = verification_function
 
     def create_hit(
             self, rendered_template, hit_type: str = '', hit_lifetime_seconds=3600,
@@ -125,23 +130,6 @@ class HITManager:
     def is_hit_expired(hit_dict):
         return datetime.datetime.now().timestamp() >= hit_dict['Expiration'].timestamp()
 
-    def _build_assignment_dict(self, assignment):
-        """Extracts answers from Mturk assignment dict returned by boto3 api.
-
-        This method is particular to each template, so subclasses are encouraged to override it.
-
-        Returns:
-            A dictionary with the extracted data, or None if there are no Answers in the
-            assignment.
-        """
-        answer = self._parse_xml_response(assignment["Answer"])
-        if answer is not None:
-            assignment_dict = {}
-            assignment_dict['WorkerId'] = assignment['WorkerId']
-            assignment_dict["InputInstruction"] = answer
-            return assignment_dict
-        return None
-
     def complete_open_assignments(self, hit_ids: List[str]) -> Dict[str, Any]:
         """Get a list of the Assignments that have been submitted for all open hits.
 
@@ -154,11 +142,17 @@ class HITManager:
             dict: Dictionary from hit ids to responses of the assignments for that hit.
             If there is more than one assignment for the HIT, only the value of the last valid
             one is retrieved.
+            The values are dictionaries with the results from each assignment. They contain
+            the specific keys
+                * `WorkerId`
+                * `Answer` the parsed content of the original mturk client response under keys
+                    ["QuestionFormAnswers"]["Answer"]
+                * `IsHitQualified`, the result of applying `self.verification_function`
+                    on the previous field.
         """
         results = {}
 
         for hit_id in hit_ids:
-
             # Get a list of the Assignments that have been submitted
             submitted_assignments = self.mturk_client.list_assignments_for_hit(
                 HITId=hit_id,
@@ -171,31 +165,22 @@ class HITManager:
             # Retrieve the attributes for each Assignment
             for assignment in assignments:
                 _LOGGER.info(f"Processing {assignment['AssignmentId']} assignment for HIT {hit_id}")
-                assignment_dict = self._build_assignment_dict(assignment)
-                if assignment_dict is not None:
-                    qualified = self.verify_new_assignment(assignment_dict)
-                    assignment_dict['IsHITQualified'] = qualified
-                    results[hit_id] = assignment_dict
-                    self.close_assignment(assignment['AssignmentId'], hit_id, qualified)
+                assignment_dict = {}
+                assignment_dict['WorkerId'] = assignment['WorkerId']
+                assignment_dict['Answer'] = self._parse_xml_response(assignment["Answer"])
+                assignment_dict['IsHITQualified'] = self.verification_function(assignment_dict)
+                results[hit_id] = assignment_dict
+                self.close_assignment(assignment['AssignmentId'], hit_id, assignment_dict['IsHITQualified'])
         return results
 
     @staticmethod
     def _parse_xml_response(xml_answer: str):
-        xml_doc = xmltodict.parse(xml_answer)
-        # Parse the XML response
-        if type(xml_doc["QuestionFormAnswers"]["Answer"]) is list:
-            # Multiple fields in HIT layout
-            for answer_field in xml_doc["QuestionFormAnswers"]["Answer"]:
-                input_field = answer_field["QuestionIdentifier"]
-                if input_field == 'InputInstructionSingleTurn':
-                    return answer_field["FreeText"]
-        else:
-            # One field found in HIT layout
-            input_field = xml_doc["QuestionFormAnswers"]["Answer"]["QuestionIdentifier"]
-            if input_field == "InputInstructionSingleTurn":
-                return xml_doc["QuestionFormAnswers"]["Answer"]["FreeText"]
+        """Parses xml answers from Mturk assignment dict returned by boto3 api.
 
-        return None
+        Returns:
+            A dictionary with the extracted data under keys ['QuestionFormAnswers']['Answer'].
+        """
+        return xmltodict.parse(xml_answer)['QuestionFormAnswers']['Answer']
 
     def verify_new_assignment(self, assignment_dict) -> bool:
         """Asserts whether the assignment should be approved or not.
