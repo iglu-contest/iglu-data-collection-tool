@@ -1,10 +1,7 @@
-import uuid
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 from azure.core.exceptions import ResourceExistsError
 from azure.data.tables import TableServiceClient, TableClient, UpdateMode
 from azure.storage.blob import ContainerClient
-from random_word import RandomWords
-from pyparsing import Any
 
 import logger
 
@@ -53,20 +50,12 @@ class AzureGameStorage:
         _LOGGER.debug(f"Entering {self.__class__.__name__} context anc closing TableClient.")
         return self
 
-
     def __exit__(self, exception_type, exception_value, traceback):
         self.table_client.__exit__(
             exception_type, exception_value, traceback)
         _LOGGER.debug(f"Leaving {self.__class__.__name__} context and closing TableClient.")
         self.table_client = None
         return None
-
-    def get_next_game_id(self):
-        """Example of generating a fast new random game id."""
-        word_generator = RandomWords()
-        random_prefix = '-'.join([word_generator.get_random_word() for i in range(3)])
-        print(random_prefix)
-        return random_prefix + str(uuid.uuid4())
 
     def select_start_worlds_ids(self, game_count: int = 30) -> List[str]:
         """

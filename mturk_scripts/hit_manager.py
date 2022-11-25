@@ -45,6 +45,9 @@ class HITManager:
             endpoint_url=mturk_endpoint,
         )
         self.max_hits = max_hits
+        # Save the open hits to know when to stop the collection. More hits may be open
+        # from previous runs, and will be completed by this script.
+        self.session_open_hits = set()
 
     def create_hit(
             self, rendered_template, hit_type: str = '', hit_lifetime_seconds=3600,
@@ -90,6 +93,7 @@ class HITManager:
         )
         hit_id = hit['HIT']['HITId']
         _LOGGER.info(f'HIT created with Id {hit_id}')
+        self.session_open_hits.add(hit_id)
         return hit_id
 
     def get_open_hit_ids(self, hit_type: str) -> List[Dict[str, Any]]:
@@ -111,6 +115,8 @@ class HITManager:
                 hit['HITReviewStatus'] not in ['ReviewedAppropriate', 'ReviewedInappropriate'] and
                     not self.is_hit_expired(hit)):
                 selected_hits.append(hit['HITId'])
+        # Add the hits opened by this script that may not have been processed by mturk yet
+        selected_hits = list(set(selected_hits).union(self.session_open_hits))
 
         _LOGGER.info(f"{len(selected_hits)} previous open hits of type {hit_type} returned")
         return selected_hits
@@ -222,4 +228,5 @@ class HITManager:
         )
 
         self.mturk_client.delete_hit(HITId=hit_id)
+        self.session_open_hits.remove(hit_id)
         _LOGGER.info(f"Assignment {assignment_id} and {hit_id} closed.")
