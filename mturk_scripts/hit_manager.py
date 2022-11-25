@@ -158,7 +158,7 @@ class HITManager:
                 HITId=hit_id,
                 AssignmentStatuses=['Submitted']
             )
-            if submitted_assignments["NumResults"] == 0:
+            if submitted_assignments['NumResults'] == 0:
                 continue
 
             assignments = submitted_assignments['Assignments']
@@ -167,7 +167,7 @@ class HITManager:
                 _LOGGER.info(f"Processing {assignment['AssignmentId']} assignment for HIT {hit_id}")
                 assignment_dict = {}
                 assignment_dict['WorkerId'] = assignment['WorkerId']
-                assignment_dict['Answer'] = self._parse_xml_response(assignment["Answer"])
+                assignment_dict['Answer'] = self._parse_xml_response(assignment['Answer'])
                 assignment_dict['IsHITQualified'] = self.verification_function(assignment_dict)
                 results[hit_id] = assignment_dict
                 self.close_assignment(assignment['AssignmentId'], hit_id, assignment_dict['IsHITQualified'])
@@ -182,25 +182,6 @@ class HITManager:
         """
         return xmltodict.parse(xml_answer)['QuestionFormAnswers']['Answer']
 
-    def verify_new_assignment(self, assignment_dict) -> bool:
-        """Asserts whether the assignment should be approved or not.
-
-        Args:
-            assignment_dict (dictionary): A dictionary representation of the
-                assignment, with at least keys 'InputInstruction'.
-
-        Returns:
-            bool: _description_
-        """
-        qualified = False
-        if 'InputInstruction' in assignment_dict.keys():
-            instruction = assignment_dict['InputInstruction']
-            if (instruction is not None and
-                    len(instruction.strip()) > 5 and
-                    utils.is_english(instruction)):
-                qualified = True
-        return qualified
-
     def close_assignment(self, assignment_id: str, hit_id: str, is_qualified: bool):
         """Approve or not the assignment based on its qualification, and delete the hit.
 
@@ -213,5 +194,6 @@ class HITManager:
         )
 
         self.mturk_client.delete_hit(HITId=hit_id)
-        self.session_open_hits.remove(hit_id)
+        if hit_id in self.session_open_hits:
+            self.session_open_hits.remove(hit_id)
         _LOGGER.info(f"Assignment {assignment_id} and {hit_id} closed.")
