@@ -1,0 +1,31 @@
+{
+    "production": {
+        "mturk_endpoint": "https://mturk-requester.us-east-1.amazonaws.com",
+        "mturk_preview": "https://www.mturk.com/mturk/preview",
+        "hits_table_name": "HitsTableSingleTurn",
+        "starting_structures_blob_prefix": "builder-data",
+        "starting_structures_container_name": "mturk-vw",
+        "result_structures_container_name": "mturk-single-turn",
+        "qualification_type_id": "35BVO3HY70B8TNADYQD89ER1WK0V9J",
+        "reward": "0.80",
+        "keywords": "boto, qualification, iglu, minecraft,",
+        "auto_approval_delay_seconds": 3600,
+        "assignment_duration_in_seconds": 480,
+        "title": "IGLU - Play Minecraft game in Voxel World!",
+        "description": "Perform actions in a Minecraft like world and describe the action in the form of an instruction."
+    },
+    "sandbox": {
+        "mturk_endpoint": "https://mturk-requester-sandbox.us-east-1.amazonaws.com",
+        "mturk_preview": "https://workersandbox.mturk.com/mturk/preview",
+        "hits_table_name": "TestHitsTableSingleTurn",
+        "starting_structures_blob_prefix": "test-builder-data",
+        "starting_structures_container_name": "mturk-vw",
+        "result_structures_container_name": "mturk-single-turn",
+        "reward": "0.80",
+        "keywords": "boto, qualification, iglu, minecraft,",
+        "auto_approval_delay_seconds": 300,
+        "assignment_duration_in_seconds": 300,
+        "title": "Sandbox: IGLU - Play Minecraft game in Voxel World!",
+        "description": "Perform actions in a Minecraft like world and describe the action in the form of an instruction."
+    }
+}

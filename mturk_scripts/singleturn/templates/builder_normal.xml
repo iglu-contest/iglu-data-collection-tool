@@ -1,0 +1,137 @@
+<HTMLQuestion xmlns="http://mechanicalturk.amazonaws.com/AWSMechanicalTurkDataSchemas/2011-11-11/HTMLQuestion.xsd">
+  <HTMLContent><![CDATA[
+<!DOCTYPE html>
+<html>
+<style>
+  view_color {
+    background-color: #d5f4e6;
+  }
+
+  .frame {
+  height: 160px; /*can be anything*/
+  width: 160px; /*can be anything*/
+  display: inline-block;
+  vertical-align: top; /*not required*/
+  border: 1px solid black; /*not required*/
+  position: relative;
+}
+#worlddiv {
+        float: left;
+        position:relative;
+        width: 700px;
+        height: 500px;
+      }
+#instruction_text {
+  width: 95%;
+}
+#clarifying_question {
+    width: 95%;
+}
+#instruction_cell {
+    max-width: 45em;
+}
+#picked_view {
+    position:relative;
+    width: 160px;
+    height: 145px;
+}
+.frame span {
+  font-family: arial, sans-serif;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  text-align: center;
+  color: white;
+  background: rgba(0,0,0,0.4);
+  font-size: 12px;
+}
+</style>
+<head>
+  <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'/>
+  <script type='text/javascript' src='https://s3.amazonaws.com/mturk-public/externalHIT_v1.js'></script>
+  <script type="text/javascript">
+   function handleSubmit(txt) {
+      console.log('upload to Azure');
+      console.log('$gameId');
+      myWorld.uploadToCloud('https://iglumturkstorage.blob.core.windows.net/mturk-single-turn/${builderDataPath}/actionHit/',
+      '$sas',
+      '$gameId', '$gameId-step-action', function() {
+        document.getElementById("mturk_form").submit();
+      });
+      return false;
+   }
+   function recover_world() {
+     myWorld.recoverWorldState('https://iglumturkstorage.blob.core.windows.net/mturk-vw/${builderDataPath}/',
+     '$sas',
+     '$initializedWorldGameId', '$screenshotStep')
+   }
+
+  </script>
+</head>
+<body>
+<table style="width:100%">
+  <tr>
+    <td valign="top" align="left" id="instruction_cell">
+    <form name='mturk_form' method='post' id='mturk_form' onsubmit="return handleSubmit()" action='https://www.mturk.com/mturk/externalSubmit'>
+    <input type='hidden' value='' name='assignmentId' id='assignmentId'/>
+    <p align="left"><b><view_color>Please wait! It may take some time for voxel world to load</view_color></b></p>
+    <ul align="left">
+      <li>You will be shown a 3-D voxel world environment on the right pane which might include a structure or a few blocks</li>
+      <li>Build a structure based on your creativity in <b>about 1 minute</b> given the available moves, i.e., place/destroy blocks in different colors</li>
+      <li><b>1 minute after your first action in the world has passed, the world will freeze and you will not be able to make any more changes.</b>You should have made significant changes in the initialized structure.</li>
+      <li>You are going to write instructions on how to build the structure you built in plain text. Make sure your instructions are understandable, concise, and in English</li>
+      <li>Please consider that any one who wants to rebuild your structure is totally unaware of your designed structure and will only have access to your instruction and same initialized structure</li>
+    </ul>
+
+    <b>Use the following keyboard commands to operate in the voxel world:</b>
+    <ul align="left">
+      <li><b>mouse click</b> on the game area: to activate builder and see the cursor</li>
+      <li><b>w/a/s/d</b>: move forward/left/backward/right </li>
+      <li><b>space</b>: Move up</li>
+      <li><b>shift</b>: Move down</li>
+      <li><b>mouse click</b>: Break block </li>
+      <li><b>red cursor</b>: Indicates where the block will be placed </li>
+      <li><b>1/2/3/4/5/6</b>: Place a blue/yellow/green/orange/purple/red block </li>
+      <li><b>esc</b>: Leave the Voxel world area</li>
+    </ul>
+    </div>
+
+    <b>Image of the starting world to help you track changes you made to the world in the right pane:</b>
+    <p>
+    <div class=frame>
+        <img id="picked_view" src="https://iglumturkstorage.blob.core.windows.net/mturk-vw/$builderDataPath/$initializedWorldGameId/$screenshotStepView.png"/>
+    </div>
+    <br>
+    <br>
+    <b>Write about the changes you made to the world in a few simple sentences. Write it in the form of an instruction</b>
+
+    <textarea name='InputInstructionSingleTurn' rows='3' maxlength='200' id='instruction_text'></textarea>
+    <br>
+    <p><input type='submit' id='submitButton' value='Submit'/></p></form>
+    <script language='Javascript'>
+    turkSetAssignmentID();
+    </script>
+   </td>
+
+    <td valign="top">
+        <div id="worlddiv">
+        <b>Please note that you will only get paid if you:</b>
+        <ul align="left">
+          <li>Make a significant change in the given structure i.e., destroy/build <view_color> at least 3 blocks in voxel world</view_color></li>
+          <li>Write understandable and concise English instructions</li>
+          <li>Click on the <view_color><b>"Submit"</b> button at the bottom</view_color></li>
+          <li>The explained actions are in "instructions format" and  informative enough to allow someone else to rebuild  the structure</li>
+        </ul>
+        </div>
+    </td>
+  </tr>
+</table>
+<!-- <script onload="recover_world()" src="https://cdn.jsdelivr.net/gh/snyxan/myWorld@main/myWorld_option_1.js"></script>  -->
+<script onload="recover_world()" src="https://cdn.jsdelivr.net/gh/snyxan/myWorld@main/myWorld_freeze.js"></script>
+</body>
+</html>
+]]>
+  </HTMLContent>
+  <FrameHeight>0</FrameHeight>
+</HTMLQuestion>
