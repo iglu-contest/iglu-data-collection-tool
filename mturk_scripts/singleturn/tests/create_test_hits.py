@@ -20,19 +20,18 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
 dotenv.load_dotenv(
     os.path.join(os.path.dirname(__file__), '..', '.env'))
 
-import logger  # noqa: E402
 
 from hit_manager import HITManager  # noqa: E402
 from singleturn.builder_template_renderer import BuilderTemplateRenderer  # noqa: E402
-from singleturn.singleturn_games_storage import IgluSingleTurnGameStorage  # noqa: E402
-from utils import read_config  # noqa: E402
+from singleturn.singleturn_games_storage import SingleTurnGameStorage  # noqa: E402
+from common import utils, logger  # noqa: E402
 
 _LOGGER = logger.get_logger(__name__)
 
 
 def main():
 
-    config = read_config("sandbox", config_filepath='../env_configs.json')
+    config = utils.read_config("sandbox", config_filepath='../env_configs.json')
     # Create hits without qualifiers
     if 'qualification_type_id' in config:
         config.pop('qualification_type_id')
@@ -44,7 +43,7 @@ def main():
 
     hit_count = 3
 
-    with IgluSingleTurnGameStorage(**config) as game_storage:
+    with SingleTurnGameStorage(**config) as game_storage:
         turn_type = 'builder-normal'
         open_turns = game_storage.get_open_turns(turn_type, hit_count)
         _LOGGER.info(f"Creating hits for turns {len(open_turns)}")

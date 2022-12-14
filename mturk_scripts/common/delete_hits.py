@@ -7,35 +7,35 @@ import dotenv
 import os
 import sys
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
+# Project root
 sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
 
-# Load dotenv before project imports
-dotenv.load_dotenv(
-    os.path.join(os.path.dirname(__file__), '..', '.env'))
-
-import logger  # noqa: E402
-
 from hit_manager import HITManager  # noqa: E402
-from utils import read_config  # noqa: E402
+from common import utils, logger  # noqa: E402
 
 _LOGGER = logger.get_logger(__name__)
 
 
 def read_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-       '--hit_type', help='Type of hit to delete.', default='test-hit',
-    )
+    parser.add_argument('--hit_type', type=str, help='Type of hit to delete.',
+                        default='test-hit')
+    parser.add_argument('--config_filepath', type=str, help='Path to file with json config.',
+                        default='env_configs.json')
+    parser.add_argument('--config', choices=['production', 'sandbox'], default='sandbox',
+                        help='Environment to use for operations')
+    parser.add_argument('--env_filepath', type=str, default='.env',
+                        help='Path to .env file with environment variables AWS_ACCESS_KEY_ID. '
+                             'and AWS_SECRET_ACCESS_KEY, in case they are not already set.')
     return parser.parse_args()
 
 
 def main():
     args = read_args()
-    config = read_config("sandbox", config_filepath='../env_configs.json')
 
-    config['aws_access_key'] = os.getenv("AWS_ACCESS_KEY_ID_LIT")
-    config['aws_secret_key'] = os.getenv("AWS_SECRET_ACCESS_KEY_LIT")
+    dotenv.load_dotenv(args.env_filepath)
+
+    config = utils.read_config(args.config, config_filepath=args.config_filepath)
 
     hit_manager = HITManager(
         mturk_endpoint=config['mturk_endpoint'],

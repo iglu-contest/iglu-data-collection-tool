@@ -3,11 +3,12 @@ from azure.core.exceptions import ResourceExistsError
 from azure.data.tables import TableServiceClient, TableClient, UpdateMode
 from azure.storage.blob import ContainerClient
 
-import logger
 
 from turn import Turn
+from common import logger
 
 _LOGGER = logger.get_logger(__name__)
+logger.set_logger_level('azure')
 
 
 class AzureGameStorage:

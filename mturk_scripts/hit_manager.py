@@ -8,8 +8,7 @@ import xmltodict
 from string import Template
 from typing import Any, Callable, Dict, List, Optional
 
-import logger
-import utils
+from common import logger
 
 _LOGGER = logger.get_logger(__name__)
 
@@ -64,13 +63,6 @@ class HITManager:
             qualification_country_codes: Optional[List[str]] = None,
             **kwargs) -> str:
 
-        common_kwargs = dict(
-            LifetimeInSeconds=hit_lifetime_seconds,  # 604800
-            MaxAssignments=max_assignments,
-            Keywords=keywords,
-            AutoApprovalDelayInSeconds=auto_approval_delay_seconds,
-        )
-
         qualifiers = []
         if qualification_type_id is not None:
             qualifiers.append({
@@ -87,7 +79,10 @@ class HITManager:
             })
 
         hit = self.mturk_client.create_hit(
-            **common_kwargs,
+            LifetimeInSeconds=hit_lifetime_seconds,  # 604800
+            MaxAssignments=max_assignments,
+            Keywords=keywords,
+            AutoApprovalDelayInSeconds=auto_approval_delay_seconds,
             Reward=reward,
             AssignmentDurationInSeconds=assignment_duration_in_seconds,
             Title=title,

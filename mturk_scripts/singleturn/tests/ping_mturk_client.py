@@ -14,20 +14,20 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
 dotenv.load_dotenv(
     os.path.join(os.path.dirname(__file__), '..', '.env'))
 
-import logger  # noqa: E402
-from utils import read_config  # noqa: E402
+
 from hit_manager import HITManager, TemplateRenderer  # noqa: E402
+from common import utils, logger  # noqa: E402
 
 _LOGGER = logger.get_logger(__name__)
 
 
 def main():
     endpoint = 'sandbox'
-    config = read_config(endpoint, '../env_configs.json')
+    config = utils.read_config(endpoint, '../env_configs.json')
     max_hits = 5
     hit_type = 'simple_template'
 
-    renderer = TemplateRenderer('test_data/simple_template.xml')
+    renderer = TemplateRenderer('test_data/test_html_hit.html')
 
     hit_manager = HITManager(
         mturk_endpoint=config['mturk_endpoint'],

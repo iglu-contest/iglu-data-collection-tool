@@ -49,3 +49,9 @@ def get_logger(name: str) -> logging.Logger:
         logger.setLevel(LOGLEVEL)
         logger.addHandler(stdout_handler)
     return logger
+
+
+def set_logger_level(logger_prefix, new_level=logging.WARNING):
+    for logger_name in logging.Logger.manager.loggerDict.keys():
+        if logger_prefix in logger_name:
+            logging.getLogger(logger_name).setLevel(new_level)

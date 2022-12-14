@@ -12,10 +12,10 @@ import sys
 # Project root
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
 
-import logger  # noqa: E402
+
 from singleturn.singleturn_games_storage import (
-    IgluSingleTurnGameStorage, SingleTurnDatasetTurn)  # noqa: E402
-from utils import read_config  # noqa: E402
+    SingleTurnGameStorage, SingleTurnDatasetTurn)  # noqa: E402
+from common import utils, logger  # noqa: E402
 
 # Load dotenv before project imports
 dotenv.load_dotenv(
@@ -38,10 +38,10 @@ def read_args():
 def main():
     args = read_args()
     connection_str = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
-    config = read_config(args.config, config_filepath='../env_configs.json')
+    config = utils.read_config(args.config, config_filepath='../env_configs.json')
 
     turn_type = 'builder-normal'
-    with IgluSingleTurnGameStorage(
+    with SingleTurnGameStorage(
             config['hits_table_name'], connection_str, config['starting_structures_container_name'],
             config['starting_structures_blob_prefix']) as game_storage:
 
