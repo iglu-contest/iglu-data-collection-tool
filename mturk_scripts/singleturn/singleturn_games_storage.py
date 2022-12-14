@@ -8,11 +8,12 @@ from typing import Any, Dict, List, Optional, Tuple
 # Project root
 sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
 
-import logger
 from game_storage import AzureGameStorage
 from turn import Turn
+from common import logger
 
 _LOGGER = logger.get_logger(__name__)
+logger.set_logger_level('azure')
 
 
 class SingleTurnDatasetTurn(Turn):
