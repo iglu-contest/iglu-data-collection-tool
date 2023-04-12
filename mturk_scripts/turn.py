@@ -40,9 +40,5 @@ class Turn:
     def from_database_entry(cls, row: Dict[str, Any]):
         raise NotImplementedError
 
-    def update_result_blob_path(
-            self, container_name: str, blob_subpaths: str = 'actionHit'):
-        raise NotImplementedError
-
     def to_database_entry(self, starting_structures_container_name: str) -> Dict[str, Any]:
         raise NotImplementedError

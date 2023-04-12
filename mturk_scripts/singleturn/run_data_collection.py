@@ -16,41 +16,31 @@ import time
 # Project root
 sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
 
-import logger
-import utils
-
 from hit_manager import HITManager
 from singleturn.builder_template_renderer import BuilderTemplateRenderer
-from singleturn.singleturn_games_storage import IgluSingleTurnGameStorage, SingleTurnDatasetTurn
+from singleturn.singleturn_games_storage import SingleTurnGameStorage, SingleTurnDatasetTurn
+from common import utils, logger
 
 dotenv.load_dotenv()
 
 _LOGGER = logger.get_logger(__name__)
+logger.set_logger_level('azure')
 
 
 def read_args():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument(
-       '--config',
-       help='Environment to use for operations',
-       choices=['production', 'sandbox'],
-       default='sandbox',
-    )
+    parser.add_argument('--config', choices=['production', 'sandbox'], default='sandbox',
+                        help='Environment to use for operations')
 
-    parser.add_argument(
-       "--hit_count",
-       help="Total number of accepted HITs to be created",
-       type=int,
-       required=True,
-    )
+    parser.add_argument('--config_filepath', type=str, default='env_config.json',
+                        help='Path to json file with environment configuration')
 
-    parser.add_argument(
-       "--template_filepath",
-       help="Path to the file with the xml or html template to render for each HIT.",
-       type=str,
-       default='templates/normal_builder.xml',
-    )
+    parser.add_argument("--hit_count", type=int, required=True,
+                        help="Total number of accepted HITs to be created")
+
+    parser.add_argument("--template_filepath", type=str, default='templates/builder_normal.xml',
+                        help="Path to the file with the xml/html template to render for each HIT.")
 
     return parser.parse_args()
 
@@ -101,7 +91,7 @@ def validate_assignment(assignment_dict) -> bool:
 
 def run_hits(hit_count, template_filepath, config, seconds_to_wait=60):
 
-    with IgluSingleTurnGameStorage(**config) as game_storage:
+    with SingleTurnGameStorage(**config) as game_storage:
         turn_type = 'builder-normal'
         open_turns = game_storage.get_open_turns(turn_type, hit_count)
         _LOGGER.info(f"Creating hits for turns {len(open_turns)}")
@@ -166,7 +156,7 @@ def wait_for_assignments(config, seconds_to_wait, game_storage, turn_type, hit_m
 def main():
 
     args = read_args()
-    config = utils.read_config(args.config, config_filepath='./env_configs.json')
+    config = utils.read_config(args.config, config_filepath=args.config_filepath)
 
     config['azure_connection_str'] = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
     config['azure_sas'] = os.getenv('AZURE_STORAGE_SAS')

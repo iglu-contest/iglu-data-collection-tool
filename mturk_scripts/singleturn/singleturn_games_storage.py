@@ -8,11 +8,12 @@ from typing import Any, Dict, List, Optional, Tuple
 # Project root
 sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
 
-import logger
 from game_storage import AzureGameStorage
 from turn import Turn
+from common import logger
 
 _LOGGER = logger.get_logger(__name__)
+logger.set_logger_level('azure')
 
 
 class SingleTurnDatasetTurn(Turn):
@@ -71,7 +72,7 @@ class SingleTurnDatasetTurn(Turn):
             cls._split_starting_world_path(initial_world_path)
 
         new_turn = cls(
-            game_id=row["PartitionKey"],
+            game_id=row['PartitionKey'],
             turn_type=row['HitType'],
             initialized_structure_id=row.get('InitializedWorldStructureId', None),
             starting_world_blob_path=starting_world_blob_path,
@@ -138,11 +139,11 @@ class SingleTurnDatasetTurn(Turn):
         return new_entry
 
 
-class IgluSingleTurnGameStorage(AzureGameStorage):
+class SingleTurnGameStorage(AzureGameStorage):
     """Abstraction of storage data structures for single turn games.
 
     This class is a context manager, use inside a with statement.
-    >>> with IgluSingleTurnGameStorage("hitTableName", "connectionStr") as game_storage:
+    >>> with SingleTurnGameStorage("hitTableName", "connectionStr") as game_storage:
     ...     create_new_games(self, starting_structure_ids)
     """
 
@@ -156,7 +157,7 @@ class IgluSingleTurnGameStorage(AzureGameStorage):
             the current date.
         """
         if self.table_client is None:
-            raise ValueError("IgluSingleTurnGameStorage used outside a with statement!")
+            raise ValueError("SingleTurnGameStorage used outside a with statement!")
 
         query_filter = f"HitType eq '{turn_type}'"
         entities = list(self.table_client.query_entities(
@@ -207,7 +208,7 @@ class IgluSingleTurnGameStorage(AzureGameStorage):
             (List[str]) A list with the selected blobs to be used as starting worlds.
         """
         if self.table_client is None:
-            raise ValueError("IgluSingleTurnGameStorage used outside a with statement!")
+            raise ValueError("SingleTurnGameStorage used outside a with statement!")
 
         if game_count <= 0:
             raise ValueError("Not creating any Hits as games count is less than 1")

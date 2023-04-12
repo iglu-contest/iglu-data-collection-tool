@@ -6,7 +6,7 @@ import sys
 # Project root
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
 
-from singleturn.singleturn_games_storage import IgluSingleTurnGameStorage  # noqa: E402
+from singleturn.singleturn_games_storage import SingleTurnGameStorage  # noqa: E402
 from singleturn.builder_template_renderer import BuilderTemplateRenderer  # noqa: E402
 from utils import read_config  # noqa: E402
 
@@ -32,7 +32,7 @@ def main():
     config['azure_connection_str'] = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
     config['azure_sas'] = os.getenv('AZURE_STORAGE_SAS')
 
-    with IgluSingleTurnGameStorage(**config) as game_storage:
+    with SingleTurnGameStorage(**config) as game_storage:
         hit_type = 'html_template'
         last_game_index = game_storage.get_last_game_index() + 1
 
@@ -42,7 +42,7 @@ def main():
             turn_type=hit_type, starting_world_path='test-builder-data/10-c164/step-4'
         )
 
-        renderer = BuilderTemplateRenderer('test_data/no_write_builder_normal.xml')
+        renderer = BuilderTemplateRenderer('../templates/builder_normal.xml')
 
         template = renderer.render_template_from_turn(config['azure_sas'], open_turn)
 
