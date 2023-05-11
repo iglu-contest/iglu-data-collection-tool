@@ -1,6 +1,5 @@
-# IGLU Datasets
 
-Interactive Grounded Language Understanding in a Collaborative Environment
+# Interactive Grounded Language Understanding in a Collaborative Environment
 --
 
 The primary goal of the IGLU project is to approach the problem of how
@@ -25,6 +24,38 @@ the blocks in the build region.
 <img src="./resources/imgs/voxelwrold_building_dialog.gif" width="420" height="280" alt="Gif with interactions between Architect and Builder"/>
 
 
-TODO add past competition links
+## References
 
-TODO Add citation
+The described datasets are collected as a part of [IGLU:Interactive Grounded Language Understanding in a Collaborative Environment](https://www.aicrowd.com/challenges/neurips-2022-iglu-challenge), which is described in the following papers:
+
+```
+@article{mohanty2022collecting,
+  title={Collecting Interactive Multi-modal Datasets for Grounded Language Understanding},
+  author={Mohanty, Shrestha and Arabzadeh, Negar and Teruel, Milagro and Sun, Yuxuan and Zholus, Artem and Skrynnik, Alexey and Burtsev, Mikhail and Srinet, Kavya and Panov, Aleksandr and Szlam, Arthur and others},
+  journal={arXiv preprint arXiv:2211.06552},
+  year={2022}
+}
+```
+
+```
+@inproceedings{kiseleva2022interactive,
+  title={Interactive grounded language understanding in a collaborative environment: Iglu 2021},
+  author={Kiseleva, Julia and Li, Ziming and Aliannejadi, Mohammad and Mohanty, Shrestha and ter Hoeve, Maartje and Burtsev, Mikhail and Skrynnik, Alexey and Zholus, Artem and Panov, Aleksandr and Srinet, Kavya and others},
+  booktitle={NeurIPS 2021 Competitions and Demonstrations Track},
+  pages={146--161},
+  year={2022},
+  organization={PMLR}
+}
+```
+
+```
+@article{kiseleva2022iglu,
+  title={Iglu 2022: Interactive grounded language understanding in a collaborative environment at neurips 2022},
+  author={Kiseleva, Julia and Skrynnik, Alexey and Zholus, Artem and Mohanty, Shrestha and Arabzadeh, Negar and C{\^o}t{\'e}, Marc-Alexandre and Aliannejadi, Mohammad and Teruel, Milagro and Li, Ziming and Burtsev, Mikhail and others},
+  journal={arXiv preprint arXiv:2205.13771},
+  year={2022}
+}
+```
+
+Consider citing the papers above if you use the assets for your research.
+
