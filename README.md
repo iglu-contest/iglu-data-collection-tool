@@ -23,6 +23,9 @@ the blocks in the build region.
 
 <img src="./resources/imgs/voxelwrold_building_dialog.gif" width="420" height="280" alt="Gif with interactions between Architect and Builder"/>
 
+## Datasets
+
+This tool was used to collect multi-modal data for the IGLU competiton which is publicly available in this [repo] (https://github.com/microsoft/iglu-datasets).
 
 ## References
 
@@ -58,4 +61,7 @@ The described datasets are collected as a part of [IGLU:Interactive Grounded Lan
 ```
 
 Consider citing the papers above if you use the assets for your research.
+
+## License
+See here for [MIT License] (https://github.com/iglu-contest/iglu-data-collection-tool?tab=MIT-1-ov-file#readme)
 
