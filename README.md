@@ -63,5 +63,5 @@ The described datasets are collected as a part of [IGLU:Interactive Grounded Lan
 Consider citing the papers above if you use the assets for your research.
 
 ## License
-See here for [MIT License] (https://github.com/iglu-contest/iglu-data-collection-tool?tab=MIT-1-ov-file#readme)
+See here for [MIT License](https://github.com/iglu-contest/iglu-data-collection-tool?tab=MIT-1-ov-file#readme).
 
