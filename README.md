@@ -25,7 +25,7 @@ the blocks in the build region.
 
 ## Datasets
 
-This tool was used to collect multi-modal data for the IGLU competiton which is publicly available in this [repo] (https://github.com/microsoft/iglu-datasets).
+This tool was used to collect multi-modal data for the IGLU competiton which is publicly available in this [repo](https://github.com/microsoft/iglu-datasets).
 
 ## References
 
